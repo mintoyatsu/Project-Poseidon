@@ -366,6 +366,7 @@ public final class CraftServer implements Server {
 
         boolean animals = config.getBoolean("spawn-animals", console.spawnAnimals);
         boolean monsters = config.getBoolean("spawn-monsters", console.worlds.get(0).spawnMonsters > 0);
+        int difficulty = config.getInt("difficulty", console.worlds.get(0).spawnMonsters);
 
         console.onlineMode = config.getBoolean("online-mode", console.onlineMode);
         console.spawnAnimals = config.getBoolean("spawn-animals", console.spawnAnimals);
@@ -374,6 +375,7 @@ public final class CraftServer implements Server {
 
         for (WorldServer world : console.worlds) {
             world.spawnMonsters = monsters ? 1 : 0;
+            world.spawnMonsters = difficulty;
             world.setSpawnFlags(monsters, animals);
         }
 

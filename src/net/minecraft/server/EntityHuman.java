@@ -177,7 +177,8 @@ public abstract class EntityHuman extends EntityLiving {
 
     public void v() {
         // CraftBukkit - spawnMonsters -> allowMonsters
-        if (!this.world.allowMonsters && this.health < 20 && this.ticksLived % 20 * 12 == 0) {
+        if (this.world.spawnMonsters == 0 && this.health < 20 && this.ticksLived % 20 * 12 == 0) {
+            // CraftBukkit - added regain reason of "REGEN" for filtering purposes.
             this.b(1, RegainReason.REGEN);
         }
 

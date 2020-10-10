@@ -233,7 +233,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
 
             world.tracker = new EntityTracker(this, dimension);
             world.addIWorldAccess(new WorldManager(this, world));
-            world.spawnMonsters = this.propertyManager.getBoolean("spawn-monsters", true) ? 1 : 0;
+            world.spawnMonsters = this.propertyManager.getInt("difficulty", 1);
             world.setSpawnFlags(this.propertyManager.getBoolean("spawn-monsters", true), this.spawnAnimals);
             this.worlds.add(world);
             this.serverConfigurationManager.setPlayerFileData(this.worlds.toArray(new WorldServer[0]));

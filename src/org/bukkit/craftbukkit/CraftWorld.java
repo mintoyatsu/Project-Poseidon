@@ -18,6 +18,7 @@ import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
+import org.bukkit.Difficulty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -572,6 +573,14 @@ public class CraftWorld implements World {
 
     public void setAutoSave(boolean value) {
         world.canSave = !value;
+    }
+
+    public void setDifficulty(Difficulty difficulty) {
+        this.getHandle().spawnMonsters = difficulty.getValue();
+    }
+
+    public Difficulty getDifficulty() {
+        return Difficulty.getByValue(this.getHandle().spawnMonsters);
     }
 
     public boolean hasStorm() {
