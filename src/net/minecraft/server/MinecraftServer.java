@@ -66,6 +66,60 @@ public class MinecraftServer implements Runnable, ICommandListener {
     private WatchDogThread watchDogThread;
     //Poseidon End
 
+    // Sourced from Paper
+    public static final int TPS = 20;
+    public static final int TICK_TIME = 1000000000 / TPS;
+    private static final int SAMPLE_INTERVAL = 20;
+
+    private static final long SEC_IN_NANO = 1000000000;
+    private static final long MAX_CATCHUP_BUFFER = TICK_TIME * TPS * 60L;
+    private long lastTick = 0;
+    private long catchupTime = 0;
+    public final RollingAverage tps1 = new RollingAverage(60);
+    public final RollingAverage tps5 = new RollingAverage(60 * 5);
+    public final RollingAverage tps15 = new RollingAverage(60 * 15);
+
+    public static class RollingAverage {
+        private final int size;
+        private long time;
+        private java.math.BigDecimal total;
+        private int index = 0;
+        private final java.math.BigDecimal[] samples;
+        private final long[] times;
+
+        RollingAverage(int size) {
+            this.size = size;
+            this.time = size * SEC_IN_NANO;
+            this.total = dec(TPS).multiply(dec(SEC_IN_NANO)).multiply(dec(size));
+            this.samples = new java.math.BigDecimal[size];
+            this.times = new long[size];
+            for (int i = 0; i < size; i++) {
+                this.samples[i] = dec(TPS);
+                this.times[i] = SEC_IN_NANO;
+            }
+        }
+
+        private static java.math.BigDecimal dec(long t) {
+            return new java.math.BigDecimal(t);
+        }
+        public void add(java.math.BigDecimal x, long t) {
+            time -= times[index];
+            total = total.subtract(samples[index].multiply(dec(times[index])));
+            samples[index] = x;
+            times[index] = t;
+            time += t;
+            total = total.add(x.multiply(dec(t)));
+            if (++index == size) {
+                index = 0;
+            }
+        }
+
+        public double getAverage() {
+            return total.divide(dec(time), 30, java.math.RoundingMode.HALF_UP).doubleValue();
+        }
+    }
+    private static final java.math.BigDecimal TPS_BASE = new java.math.BigDecimal(1E9).multiply(new java.math.BigDecimal(SAMPLE_INTERVAL));
+
     public MinecraftServer(OptionSet options) { // CraftBukkit - adds argument OptionSet
         new ThreadSleepForever(this);
 
@@ -358,35 +412,44 @@ public class MinecraftServer implements Runnable, ICommandListener {
     public void run() {
         try {
             if (this.init()) {
-                long i = System.currentTimeMillis();
+                long start = System.nanoTime(), curTime, wait, tickSection = start;
+                lastTick = start - TICK_TIME; // Paper
 
-                for (long j = 0L; this.isRunning; Thread.sleep(1L)) {
-                    long k = System.currentTimeMillis();
-                    long l = k - i;
-
-                    if (l > 2000L) {
-                        log.warning("Can\'t keep up! Did the system time change, or is the server overloaded?");
-                        l = 2000L;
-                    }
-
-                    if (l < 0L) {
-                        log.warning("Time ran backwards! Did the system time change?");
-                        l = 0L;
-                    }
-
-                    j += l;
-                    i = k;
-                    if (this.worlds.get(0).everyoneDeeplySleeping()) { // CraftBukkit
-                        this.h();
-                        j = 0L;
-                    } else {
-                        while (j > 50L) {
-                            MinecraftServer.currentTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
-                            watchDogThread.tickUpdate(); // Project Poseidon
-                            j -= 50L;
-                            this.h();
+                while (this.isRunning) {
+                    curTime = System.nanoTime();
+                    // Paper start - Further improve server tick loop
+                    wait = TICK_TIME - (curTime - lastTick);
+                    if (wait > 0) {
+                        if (catchupTime < 2E6) {
+                            wait += Math.abs(catchupTime);
+                        } else if (wait < catchupTime) {
+                            catchupTime -= wait;
+                            wait = 0;
+                        } else {
+                            wait -= catchupTime;
+                            catchupTime = 0;
                         }
                     }
+                    if (wait > 0) {
+                        Thread.sleep(wait / 1000000);
+                        curTime = System.nanoTime();
+                        wait = TICK_TIME - (curTime - lastTick);
+                    }
+
+                    catchupTime = Math.min(MAX_CATCHUP_BUFFER, catchupTime - wait);
+                    if ( ++MinecraftServer.currentTick % SAMPLE_INTERVAL == 0 )
+                    {
+                        final long diff = curTime - tickSection;
+                        java.math.BigDecimal currentTps = TPS_BASE.divide(new java.math.BigDecimal(diff), 30, java.math.RoundingMode.HALF_UP);
+                        tps1.add(currentTps, diff);
+                        tps5.add(currentTps, diff);
+                        tps15.add(currentTps, diff);
+                        tickSection = curTime;
+                        watchDogThread.tickUpdate(); // Project Poseidon
+                    }
+
+                    lastTick = curTime;
+                    this.h();
                 }
             } else {
                 while (this.isRunning) {

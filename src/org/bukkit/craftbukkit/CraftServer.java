@@ -815,6 +815,10 @@ public final class CraftServer implements Server {
         return result;
     }
 
+    public double[] getTPS() {
+        return new double[] { console.tps1.getAverage(), console.tps5.getAverage(), console.tps15.getAverage() };
+    }
+
     public void setWhitelist(boolean value) {
         server.o = value;
         console.propertyManager.b("white-list", value);

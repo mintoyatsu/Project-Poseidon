@@ -464,4 +464,11 @@ public interface Server {
      * @return Set containing banned players
      */
     public Set<OfflinePlayer> getBannedPlayers();
+
+    /**
+     * Gets the current server TPS
+     *
+     * @return current server TPS (1m, 5m, 15m)
+     */
+    public double[] getTPS();
 }
