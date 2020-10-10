@@ -1853,7 +1853,7 @@ public class World implements IBlockAccess {
 
             i = MathHelper.floor(entityhuman.locX / 16.0D);
             j = MathHelper.floor(entityhuman.locZ / 16.0D);
-            byte b0 = 9;
+            byte b0 = (byte) getServer().getViewDistance(); // Tick only based on view distance
 
             for (k = -b0; k <= b0; ++k) {
                 for (l = -b0; l <= b0; ++l) {
