@@ -74,8 +74,8 @@ public class EntityTrackerEntry {
             Object packet = null;
             // mob movement fix, credit to Oldmana#7086 from the Modification Station discord server
             // https://discordapp.com/channels/397834523028488203/397839387465089054/684637208199823377
-            int movementUpdateTreshold = 1;
-            int rotationUpdateTreshold = 1;
+            int movementUpdateTreshold = 8;
+            int rotationUpdateTreshold = 8;
             boolean needsPositionUpdate = Math.abs(encodedDiffX) >= movementUpdateTreshold || Math.abs(encodedDiffY) >= movementUpdateTreshold || Math.abs(encodedDiffZ) >= movementUpdateTreshold
             		|| tracker instanceof EntityBoat || tracker instanceof EntityMinecart;
             
