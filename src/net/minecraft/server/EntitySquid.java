@@ -154,4 +154,8 @@ public class EntitySquid extends EntityWaterAnimal {
 
         this.U();
     }
+
+    public boolean d() {
+        return this.locY > 45.0D && this.locY < 64.0D;
+    }
 }
