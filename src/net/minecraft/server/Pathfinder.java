@@ -175,7 +175,7 @@ public class Pathfinder {
                                 return -1;
                             }
 
-                            if (material == Material.LAVA) {
+                            if (material == Material.LAVA || k1 == Block.FENCE.id) {
                                 return -2;
                             }
                         } else {
