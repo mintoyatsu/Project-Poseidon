@@ -16,28 +16,48 @@ public class BlockMushroom extends BlockFlower {
 
     public void a(World world, int i, int j, int k, Random random) {
         if (random.nextInt(100) == 0) {
+            org.bukkit.World bworld = world.getWorld();
+            byte shroomRadius = 4;
+            int maxShrooms = 5;
+
+            for (int x = i - shroomRadius; x <= i + shroomRadius; x++) {
+                for (int z = k - shroomRadius; z <= k + shroomRadius; z++) {
+                    for (int y = j - 1; y <= j + 1; y++) {
+                        if (bworld.getBlockAt(x, y, z).getTypeId() == this.id && --maxShrooms <= 0) {
+                            return;
+                        }
+                    }
+                }
+            }
+
             int l = i + random.nextInt(3) - 1;
             int i1 = j + random.nextInt(2) - random.nextInt(2);
             int j1 = k + random.nextInt(3) - 1;
 
-            if (world.isEmpty(l, i1, j1) && this.f(world, l, i1, j1)) {
-                int k1 = i + (random.nextInt(3) - 1);
-
-                k1 = k + (random.nextInt(3) - 1);
+            for (int l1 = 0; l1 < 4; l1++) {
                 if (world.isEmpty(l, i1, j1) && this.f(world, l, i1, j1)) {
-                    // CraftBukkit start
-                    org.bukkit.World bworld = world.getWorld();
-                    org.bukkit.block.BlockState blockState = bworld.getBlockAt(l, i1, j1).getState();
-                    blockState.setTypeId(this.id);
-
-                    BlockSpreadEvent event = new BlockSpreadEvent(blockState.getBlock(), bworld.getBlockAt(i, j, k), blockState);
-                    world.getServer().getPluginManager().callEvent(event);
-
-                    if (!event.isCancelled()) {
-                        blockState.update(true);
-                    }
-                    // CraftBukkit end
+                    i = l;
+                    j = i1;
+                    k = j1;
                 }
+
+                l = i + random.nextInt(3) - 1;
+                i1 = j + random.nextInt(2) - random.nextInt(2);
+                j1 = k + random.nextInt(3) - 1;
+            }
+
+            if (world.isEmpty(l, i1, j1) && this.f(world, l, i1, j1)) {
+                // CraftBukkit start
+                org.bukkit.block.BlockState blockState = bworld.getBlockAt(l, i1, j1).getState();
+                blockState.setTypeId(this.id);
+
+                BlockSpreadEvent event = new BlockSpreadEvent(blockState.getBlock(), bworld.getBlockAt(i, j, k), blockState);
+                world.getServer().getPluginManager().callEvent(event);
+
+                if (!event.isCancelled()) {
+                    blockState.update(true);
+                }
+                // CraftBukkit end
             }
         }
     }
