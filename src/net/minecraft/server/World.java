@@ -27,7 +27,7 @@ public class World implements IBlockAccess {
     private List C = new ArrayList();
     public List entityList = new ArrayList();
     private List D = new ArrayList();
-    private TreeSet E = new TreeSet();
+    private java.util.PriorityQueue<NextTickListEntry> E = new java.util.PriorityQueue<>(); // Change to priority queue
     private Set F = new HashSet();
     public List c = new ArrayList();
     private List G = new ArrayList();
@@ -1973,13 +1973,13 @@ public class World implements IBlockAccess {
             }
 
             for (int j = 0; j < i; ++j) {
-                NextTickListEntry nextticklistentry = (NextTickListEntry) this.E.first();
+                NextTickListEntry nextticklistentry = (NextTickListEntry) this.E.peek(); // Use peek function
 
                 if (!flag && nextticklistentry.e > this.worldData.f()) {
                     break;
                 }
 
-                this.E.remove(nextticklistentry);
+                this.E.poll(); // Use poll function
                 this.F.remove(nextticklistentry);
                 byte b0 = 8;
 
