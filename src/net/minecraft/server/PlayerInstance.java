@@ -17,6 +17,7 @@ class PlayerInstance {
     private int k;
     private int l;
     private int m;
+    private long previousWorldTime; // Used when chunk InhabitedTime is being calculated
 
     final PlayerManager playerManager;
 
@@ -41,6 +42,10 @@ class PlayerInstance {
             }
             // CraftBukkit end
 
+            if (this.b.isEmpty()) {
+                this.previousWorldTime = this.playerManager.a().getWorld().getFullTime();
+            }
+
             this.b.add(entityplayer);
             entityplayer.chunkCoordIntPairQueue.add(this.location);
         }
@@ -51,6 +56,9 @@ class PlayerInstance {
             this.b.remove(entityplayer);
             if (this.b.size() == 0) {
                 long i = (long) this.chunkX + 2147483647L | (long) this.chunkZ + 2147483647L << 32;
+
+                this.increaseInhabitedTime();
+                PlayerManager.getChunkWatcherList(this.playerManager).remove(this);
 
                 PlayerManager.a(this.playerManager).b(i);
                 if (this.dirtyCount > 0) {
@@ -188,5 +196,13 @@ class PlayerInstance {
                 this.sendAll(packet);
             }
         }
+    }
+
+    public void increaseInhabitedTime() {
+        Chunk chunk = this.playerManager.a().getChunkAt(this.chunkX, this.chunkZ);
+        long time = this.playerManager.a().getWorld().getFullTime();
+
+        chunk.inhabitedTime += time - this.previousWorldTime;
+        this.previousWorldTime = time;
     }
 }

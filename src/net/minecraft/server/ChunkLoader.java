@@ -121,6 +121,7 @@ public class ChunkLoader implements IChunkLoader {
         nbttagcompound.a("BlockLight", chunk.g.a);
         nbttagcompound.a("HeightMap", chunk.heightMap);
         nbttagcompound.a("TerrainPopulated", chunk.done);
+        nbttagcompound.setLong("InhabitedTime", chunk.inhabitedTime); // The cumulative number of ticks players have been in this chunk
         chunk.q = false;
         NBTTagList nbttaglist = new NBTTagList();
 
@@ -168,6 +169,7 @@ public class ChunkLoader implements IChunkLoader {
         chunk.g = new NibbleArray(nbttagcompound.j("BlockLight"));
         chunk.heightMap = nbttagcompound.j("HeightMap");
         chunk.done = nbttagcompound.m("TerrainPopulated");
+        chunk.inhabitedTime = nbttagcompound.getLong("InhabitedTime"); // The cumulative number of ticks players have been in this chunk
         if (!chunk.e.a()) {
             chunk.e = new NibbleArray(chunk.b.length);
         }

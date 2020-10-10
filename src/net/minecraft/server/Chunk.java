@@ -22,6 +22,7 @@ public class Chunk {
     public boolean p;
     public boolean q;
     public long r;
+    public long inhabitedTime; // The cumulative number of ticks players have been in this chunk
 
     public Chunk(World world, int i, int j) {
         this.tileEntities = new HashMap();

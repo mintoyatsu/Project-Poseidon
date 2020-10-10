@@ -12,6 +12,8 @@ public class PlayerManager {
     private int e;
     private int f;
     private final int[][] g = new int[][] { { 1, 0}, { 0, 1}, { -1, 0}, { 0, -1}};
+    private long previousTotalWorldTime; // Used to check if InhabitedTime should be calculated
+    private List playerInstanceList = new ArrayList(); // Used when chunk should be processed
 
     public PlayerManager(MinecraftServer minecraftserver, int i, int j) {
         if (j > 15) {
@@ -30,8 +32,21 @@ public class PlayerManager {
     }
 
     public void flush() {
-        for (int i = 0; i < this.c.size(); ++i) {
-            ((PlayerInstance) this.c.get(i)).a();
+        long time = this.a().getWorld().getFullTime();
+        int i;
+
+        if (time - this.previousTotalWorldTime > 8000L) {
+            this.previousTotalWorldTime = time;
+
+            for (i = 0; i < this.playerInstanceList.size(); ++i) {
+                PlayerInstance instance = (PlayerInstance) this.playerInstanceList.get(i);
+                instance.a();
+                instance.increaseInhabitedTime();
+            }
+        } else {
+            for (i = 0; i < this.c.size(); ++i) {
+                ((PlayerInstance) this.c.get(i)).a();
+            }
         }
 
         this.c.clear();
@@ -44,6 +59,7 @@ public class PlayerManager {
         if (playerinstance == null && flag) {
             playerinstance = new PlayerInstance(this, i, j);
             this.b.a(k, playerinstance);
+            this.playerInstanceList.add(playerinstance); // Used when chunk should be processed for InhabitedTime
         }
 
         return playerinstance;
@@ -181,5 +197,9 @@ public class PlayerManager {
 
     static List b(PlayerManager playermanager) {
         return playermanager.c;
+    }
+
+    static List getChunkWatcherList(PlayerManager playermanager) {
+        return playermanager.playerInstanceList;
     }
 }
