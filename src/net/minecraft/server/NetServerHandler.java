@@ -635,15 +635,11 @@ public class NetServerHandler extends NetHandler implements ICommandListener {
             this.player.inventory.items[this.player.inventory.itemInHandIndex] = null;
         }
 
-        this.player.h = true;
-        this.player.inventory.items[this.player.inventory.itemInHandIndex] = ItemStack.b(this.player.inventory.items[this.player.inventory.itemInHandIndex]);
-        Slot slot = this.player.activeContainer.a(this.player.inventory, this.player.inventory.itemInHandIndex);
-
-        this.player.activeContainer.a();
-        this.player.h = false;
-        // CraftBukkit
-        if (!ItemStack.equals(this.player.inventory.getItemInHand(), packet15place.itemstack) || always) {
-            this.sendPacket(new Packet103SetSlot(this.player.activeContainer.windowId, slot.a, this.player.inventory.getItemInHand()));
+        if (itemstack == null) {
+            this.player.h = true;
+            this.player.inventory.items[this.player.inventory.itemInHandIndex] = ItemStack.b(this.player.inventory.items[this.player.inventory.itemInHandIndex]);
+            this.player.activeContainer.a();
+            this.player.h = false;
         }
 
         worldserver.weirdIsOpCache = false;
