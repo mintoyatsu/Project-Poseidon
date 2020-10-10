@@ -22,6 +22,7 @@ public class BlockGrass extends Block {
                 int l = i + random.nextInt(3) - 1;
                 int i1 = j + random.nextInt(5) - 3;
                 int j1 = k + random.nextInt(3) - 1;
+                if (!world.chunkProvider.isChunkLoaded(l >> 4, j1 >> 4)) return; // Reduce sync chunk loads
                 int k1 = world.getTypeId(l, i1 + 1, j1);
 
                 if (world.getTypeId(l, i1, j1) == Block.DIRT.id && world.getLightLevel(l, i1 + 1, j1) >= 4 && Block.q[k1] <= 2) {
