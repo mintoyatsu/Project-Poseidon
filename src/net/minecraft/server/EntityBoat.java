@@ -216,16 +216,8 @@ public class EntityBoat extends Entity {
                 this.motZ *= 0.9900000095367432D;
             }
         } else {
-            if (d0 < 1.0D) {
-                d3 = d0 * 2.0D - 1.0D;
-                this.motY += 0.03999999910593033D * d3;
-            } else {
-                if (this.motY < 0.0D) {
-                    this.motY /= 2.0D;
-                }
-
-                this.motY += 0.007000000216066837D;
-            }
+            d3 = d0 * 2.0D - 1.0D;
+            this.motY += 0.03999999910593033D * d3;
 
             if (this.passenger != null) {
                 this.motX += this.passenger.motX * 0.2D;
