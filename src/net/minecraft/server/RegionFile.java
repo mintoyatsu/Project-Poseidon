@@ -13,7 +13,7 @@ public class RegionFile {
     private RandomAccessFile c;
     private final int[] d = new int[1024];
     private final int[] e = new int[1024];
-    private ArrayList f;
+    private ArrayList f; // PAIL: sectorsFree
     private int g;
     private long h = 0L;
 
@@ -31,21 +31,17 @@ public class RegionFile {
             int i;
 
             if (this.c.length() < 4096L) {
-                for (i = 0; i < 1024; ++i) {
-                    this.c.writeInt(0);
-                }
-
-                for (i = 0; i < 1024; ++i) {
-                    this.c.writeInt(0);
-                }
-
+                // In theory, while this could result in junk in the file, in practice it's not an issue.
+                // Windows (on NTFS) and Linux/macOS are going to fill the file with zeros.
+                this.c.setLength(0);
+                this.c.setLength(8192);
                 this.g += 8192;
             }
 
             if ((this.c.length() & 4095L) != 0L) {
-                for (i = 0; (long) i < (this.c.length() & 4095L); ++i) {
-                    this.c.write(0);
-                }
+                // In theory, while this could result in junk in the file, in practice it's not an issue.
+                // Windows (on NTFS) and Linux/macOS are going to fill the file with zeros.
+                this.c.setLength((this.c.length() | 4095L) + 1);
             }
 
             i = (int) this.c.length() / 4096;
@@ -63,8 +59,18 @@ public class RegionFile {
 
             int k;
 
+            // Read headers at once
+            java.nio.channels.FileChannel fc = this.c.getChannel();
+            java.nio.ByteBuffer header = java.nio.ByteBuffer.allocate(8192);
+            while (header.hasRemaining()) {
+                if (fc.read(header) == -1) {
+                    throw new EOFException();
+                }
+            }
+            header.flip();
+            java.nio.IntBuffer headerAsInts = header.asIntBuffer();
             for (j = 0; j < 1024; ++j) {
-                k = this.c.readInt();
+                k = headerAsInts.get();
                 this.d[j] = k;
                 if (k != 0 && (k >> 8) + (k & 255) <= this.f.size()) {
                     for (int l = 0; l < (k & 255); ++l) {
@@ -74,7 +80,7 @@ public class RegionFile {
             }
 
             for (j = 0; j < 1024; ++j) {
-                k = this.c.readInt();
+                k = headerAsInts.get();
                 this.e[j] = k;
             }
         } catch (IOException ioexception) {
@@ -126,25 +132,29 @@ public class RegionFile {
                         return null;
                     } else {
                         this.c.seek((long) (l * 4096));
-                        int j1 = this.c.readInt();
+                        // Condense into one large read
+                        java.nio.ByteBuffer bb = java.nio.ByteBuffer.allocate(4096 * i1);
+                        while (bb.hasRemaining()) {
+                            if (this.c.getChannel().read(bb) == -1) {
+                                throw new EOFException();
+                            }
+                        }
+                        bb.flip();
+                        int j1 = bb.getInt();
 
                         if (j1 > 4096 * i1) {
                             this.b("READ", i, j, "invalid length: " + j1 + " > 4096 * " + i1);
                             return null;
                         } else {
-                            byte b0 = this.c.readByte();
-                            byte[] abyte;
+                            byte b0 = bb.get();
                             DataInputStream datainputstream;
+                            InputStream src = new ByteArrayInputStream(bb.array(), bb.arrayOffset() + bb.position(), j1);
 
                             if (b0 == 1) {
-                                abyte = new byte[j1 - 1];
-                                this.c.read(abyte);
-                                datainputstream = new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(abyte)));
+                                datainputstream = new DataInputStream(new java.io.BufferedInputStream(new GZIPInputStream(src))); // Make chunk reads faster
                                 return datainputstream;
                             } else if (b0 == 2) {
-                                abyte = new byte[j1 - 1];
-                                this.c.read(abyte);
-                                datainputstream = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(abyte)));
+                                datainputstream = new DataInputStream(new java.io.BufferedInputStream(new InflaterInputStream(src))); // Make chunk reads faster
                                 return datainputstream;
                             } else {
                                 this.b("READ", i, j, "unknown version " + b0);
@@ -161,7 +171,7 @@ public class RegionFile {
     }
 
     public DataOutputStream b(int i, int j) {
-        return this.d(i, j) ? null : new DataOutputStream(new DeflaterOutputStream(new ChunkBuffer(this, i, j)));
+        return this.d(i, j) ? null : new DataOutputStream(new java.io.BufferedOutputStream(new DeflaterOutputStream(new ChunkBuffer(this, i, j)))); // Buffer writes to chunk buffer
     }
 
     protected synchronized void a(int i, int j, byte[] abyte, int k) {
