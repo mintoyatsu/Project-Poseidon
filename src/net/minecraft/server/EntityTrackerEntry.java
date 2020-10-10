@@ -97,7 +97,15 @@ public class EntityTrackerEntry {
                 //this.tracker.locY = (double) j / 32.0D;
                 //this.tracker.locZ = (double) k / 32.0D;
                 // entity has moved more than 4 blocks, send teleport
-                packet = new Packet34EntityTeleport(this.tracker.id, newEncodedPosX, newEncodedPosY, newEncodedPosZ, (byte) newEncodedRotationYaw, (byte) newEncodedRotationPitch);
+                if (this.tracker instanceof EntityHuman) {
+                    if (encodedDiffX >= -6144 && encodedDiffX < 6144 && encodedDiffZ >= -6144 && encodedDiffZ < 6144) {
+                        packet = new Packet34EntityTeleport(this.tracker.id, newEncodedPosX, newEncodedPosY, newEncodedPosZ, (byte) newEncodedRotationYaw, (byte) newEncodedRotationPitch);
+                    } else {
+                        packet = new Packet34EntityTeleport(this.tracker.id, 0, 0, 0, (byte) newEncodedRotationYaw, (byte) newEncodedRotationPitch);
+                    }
+                } else {
+                    packet = new Packet34EntityTeleport(this.tracker.id, newEncodedPosX, newEncodedPosY, newEncodedPosZ, (byte) newEncodedRotationYaw, (byte) newEncodedRotationPitch);
+                }
             }
 
             if (this.isMoving) {
