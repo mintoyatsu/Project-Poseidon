@@ -46,19 +46,18 @@ public class EntitySkeleton extends EntityMonster {
     }
 
     protected void a(Entity entity, float f) {
-        if (f < 10.0F) {
+        if (f < 15.0F) {
             double d0 = entity.locX - this.locX;
             double d1 = entity.locZ - this.locZ;
 
             if (this.attackTicks == 0) {
                 EntityArrow entityarrow = new EntityArrow(this.world, this);
 
-                ++entityarrow.locY;
-                double d2 = entity.locY + (double) entity.t() - 0.20000000298023224D - entityarrow.locY;
+                double d2 = entity.locY + (double) entity.t() - 0.69999998807907104D - entityarrow.locY;
                 float f1 = MathHelper.a(d0 * d0 + d1 * d1) * 0.2F;
 
                 this.world.makeSound(this, "random.bow", 1.0F, 1.0F / (this.random.nextFloat() * 0.4F + 0.8F));
-                entityarrow.a(d0, d2 + (double) f1, d1, 0.6F, 12.0F);
+                entityarrow.a(d0, d2 + (double) f1, d1, 1.6F, 12.0F);
                 this.world.addEntity(entityarrow);
                 this.attackTicks = 30;
             }
