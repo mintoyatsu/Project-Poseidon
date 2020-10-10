@@ -51,6 +51,7 @@ public class NetworkManager {
         try {
             // CraftBukkit start - cant compile these outside the try
             socket.setSoTimeout(30000);
+            socket.setTcpNoDelay(true); // Disable Nagle's algorithm
             this.input = new DataInputStream(socket.getInputStream());
             this.output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 5120));
         } catch (java.io.IOException socketexception) {
