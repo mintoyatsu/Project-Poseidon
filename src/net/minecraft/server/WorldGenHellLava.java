@@ -5,9 +5,11 @@ import java.util.Random;
 public class WorldGenHellLava extends WorldGenerator {
 
     private int a;
+    private boolean hiddenLava;
 
-    public WorldGenHellLava(int i) {
+    public WorldGenHellLava(int i, boolean b) {
         this.a = i;
+        this.hiddenLava = b;
     }
 
     public boolean a(World world, Random random, int i, int j, int k) {
@@ -60,7 +62,7 @@ public class WorldGenHellLava extends WorldGenerator {
                 ++i1;
             }
 
-            if (l == 4 && i1 == 1) {
+            if (!this.hiddenLava && l == 4 && i1 == 1 || l == 5) { // Hidden lava blocks from r1.5.1
                 world.setTypeId(i, j, k, this.a);
                 world.a = true;
                 Block.byId[this.a].a(world, i, j, k, random);
