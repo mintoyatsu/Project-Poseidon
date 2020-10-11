@@ -116,9 +116,9 @@ public class ChunkProviderGenerate implements IChunkProvider {
         byte b0 = 64;
         double d0 = 0.03125D;
 
-        this.r = this.n.a(this.r, (double) (i * 16), (double) (j * 16), 0.0D, 16, 16, 1, d0, d0, 1.0D);
-        this.s = this.n.a(this.s, (double) (i * 16), 109.0134D, (double) (j * 16), 16, 1, 16, d0, 1.0D, d0);
-        this.t = this.o.a(this.t, (double) (i * 16), (double) (j * 16), 0.0D, 16, 16, 1, d0 * 2.0D, d0 * 2.0D, d0 * 2.0D);
+        this.r = this.n.a(this.r, (double) (i * 16), 0.0D, (double) (j * 16), 16, 1, 16, d0, 1.0D, d0); // Fix sand/gravel noise
+        this.s = this.r; // Gravel noise optimization
+        this.t = this.o.a(this.t, (double) (i * 16), 0.0D, (double) (j * 16), 16, 1, 16, d0 * 2.0D, d0 * 2.0D, d0 * 2.0D); // Fix stone noise
 
         for (int k = 0; k < 16; ++k) {
             for (int l = 0; l < 16; ++l) {
@@ -148,19 +148,12 @@ public class ChunkProviderGenerate implements IChunkProvider {
                                 } else if (k1 >= b0 - 4 && k1 <= b0 + 1) {
                                     b1 = biomebase.p;
                                     b2 = biomebase.q;
+                                    // if/else optimization
                                     if (flag1) {
                                         b1 = 0;
-                                    }
-
-                                    if (flag1) {
                                         b2 = (byte) Block.GRAVEL.id;
-                                    }
-
-                                    if (flag) {
+                                    } else if (flag) {
                                         b1 = (byte) Block.SAND.id;
-                                    }
-
-                                    if (flag) {
                                         b2 = (byte) Block.SAND.id;
                                     }
                                 }

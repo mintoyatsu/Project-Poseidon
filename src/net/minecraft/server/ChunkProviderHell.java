@@ -137,21 +137,12 @@ public class ChunkProviderHell implements IChunkProvider {
                                     b1 = 0;
                                     b2 = (byte) Block.NETHERRACK.id;
                                 } else if (k1 >= b0 - 4 && k1 <= b0 + 1) {
-                                    b1 = (byte) Block.NETHERRACK.id;
-                                    b2 = (byte) Block.NETHERRACK.id;
+                                    // if/else optimization
                                     if (flag1) {
                                         b1 = (byte) Block.GRAVEL.id;
-                                    }
-
-                                    if (flag1) {
-                                        b2 = (byte) Block.NETHERRACK.id;
-                                    }
-
-                                    if (flag) {
+                                        b2 = (byte) Block.GRAVEL.id;
+                                    } else if (flag) {
                                         b1 = (byte) Block.SOUL_SAND.id;
-                                    }
-
-                                    if (flag) {
                                         b2 = (byte) Block.SOUL_SAND.id;
                                     }
                                 }
