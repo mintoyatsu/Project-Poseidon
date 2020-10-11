@@ -209,6 +209,13 @@ public class WorldGenBigTree extends WorldGenerator {
             int i1 = this.o[i][2];
 
             this.a(k, l, i1);
+
+            // Places 1-3 extra logs to avoid leaf decay
+            // Checks for leaves above log to prevent logs from sticking out of the top
+            for (int y = l + 1; y <= l + 3; ++y)
+            {
+                if (this.c.getTypeId(k, y + 1, i1) == Block.LEAVES.id) this.c.setRawTypeIdAndData(k, y, i1, Block.LOG.id, 0);
+            }
         }
     }
 
