@@ -148,10 +148,6 @@ public class ChunkProviderHell implements IChunkProvider {
                                     }
                                 }
 
-                                if (k1 < b0 && b1 == 0) {
-                                    b1 = (byte) Block.STATIONARY_LAVA.id;
-                                }
-
                                 j1 = i1;
                                 if (k1 >= b0 - 1) {
                                     abyte[l1] = b1;
