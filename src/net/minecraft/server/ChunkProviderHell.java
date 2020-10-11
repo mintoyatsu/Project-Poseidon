@@ -362,6 +362,13 @@ public class ChunkProviderHell implements IChunkProvider {
             (new WorldGenFlowers(Block.RED_MUSHROOM.id)).a(this.n, this.h, j1, k1, l1);
         }
 
+        if (this.h.nextInt(4) == 0) {
+            j1 = k + this.h.nextInt(16) + 8;
+            k1 = this.h.nextInt(128);
+            l1 = l + this.h.nextInt(16) + 8;
+            (new WorldGenHellLakes(Block.STATIONARY_LAVA.id)).a(this.n, this.h, j1, k1, l1);
+        }
+
         int i3;
 
         for (k1 = 0; k1 < 16; ++k1)
