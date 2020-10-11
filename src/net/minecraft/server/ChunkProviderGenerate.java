@@ -18,7 +18,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
     private double[] r = new double[256];
     private double[] s = new double[256];
     private double[] t = new double[256];
-    private MapGenBase u = new MapGenCaves();
+    private MapGenCavesRavines caveGenerator;
     private BiomeBase[] v;
     double[] d;
     double[] e;
@@ -31,6 +31,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
     public ChunkProviderGenerate(World world, long i) {
         this.p = world;
         this.j = new Random(i);
+        this.caveGenerator = new MapGenCavesRavines(this.p);
         this.k = new NoiseGeneratorOctaves(this.j, 16);
         this.l = new NoiseGeneratorOctaves(this.j, 16);
         this.m = new NoiseGeneratorOctaves(this.j, 8);
@@ -189,7 +190,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
 
     public Chunk getOrCreateChunk(int i, int j) {
         this.j.setSeed((long) i * 341873128712L + (long) j * 132897987541L);
-        byte[] abyte = new byte['\u8000'];
+        byte[] abyte = new byte[65536];
         Chunk chunk = new Chunk(this.p, abyte, i, j);
 
         this.v = this.p.getWorldChunkManager().a(this.v, i * 16, j * 16, 16, 16);
@@ -197,7 +198,7 @@ public class ChunkProviderGenerate implements IChunkProvider {
 
         this.a(i, j, abyte, this.v, adouble);
         this.a(i, j, abyte, this.v);
-        this.u.a(this, this.p, i, j, abyte);
+        this.caveGenerator.generate(i, j, abyte);
         chunk.initLighting();
         return chunk;
     }

@@ -17,7 +17,7 @@ public class ChunkProviderHell implements IChunkProvider {
     private double[] p = new double[256];
     private double[] q = new double[256];
     private double[] r = new double[256];
-    private MapGenBase s = new MapGenCavesHell();
+    private MapGenCavesRavinesHell caveGenerator;
     double[] c;
     double[] d;
     double[] e;
@@ -27,6 +27,7 @@ public class ChunkProviderHell implements IChunkProvider {
     public ChunkProviderHell(World world, long i) {
         this.n = world;
         this.h = new Random(i);
+        this.caveGenerator = new MapGenCavesRavinesHell(this.n);
         this.i = new NoiseGeneratorOctaves(this.h, 16);
         this.j = new NoiseGeneratorOctaves(this.h, 16);
         this.k = new NoiseGeneratorOctaves(this.h, 8);
@@ -174,11 +175,11 @@ public class ChunkProviderHell implements IChunkProvider {
 
     public Chunk getOrCreateChunk(int i, int j) {
         this.h.setSeed((long) i * 341873128712L + (long) j * 132897987541L);
-        byte[] abyte = new byte['\u8000'];
+        byte[] abyte = new byte[65536];
 
         this.a(i, j, abyte);
         this.b(i, j, abyte);
-        this.s.a(this, this.n, i, j, abyte);
+        this.caveGenerator.generate(i, j, abyte);
         Chunk chunk = new Chunk(this.n, abyte, i, j);
 
         return chunk;
