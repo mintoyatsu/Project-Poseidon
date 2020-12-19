@@ -53,8 +53,10 @@ import java.util.logging.Logger;
 
 public final class CraftServer implements Server {
     private final String serverName = "Project Poseidon Craftbukkit";
+    //Poseidon Versions
     private final String serverEnvironment = "POSEIDON";
-    private final String serverVersion;
+    private final String serverVersion = "1.1.5";
+    private final String releaseType = "DEVELOPMENT";
     private final String protocolVersion = "1.7.3";
     private final String GameVersion = "b1.7.3";
     private final ServicesManager servicesManager = new SimpleServicesManager();
@@ -71,7 +73,6 @@ public final class CraftServer implements Server {
         this.console = console;
         this.server = server;
         //this.serverVersion = CraftServer.class.getPackage().getImplementationVersion(); //Poseidon Replace
-        this.serverVersion = "1.1.4";
 
         Bukkit.setServer(this);
 
@@ -175,6 +176,10 @@ public final class CraftServer implements Server {
         return serverVersion;
     }
 
+    public String getPoseidonReleaseType() {
+        return releaseType;
+    }
+
     public String getServerEnvironment() {
         return serverEnvironment;
     }
@@ -218,7 +223,7 @@ public final class CraftServer implements Server {
     @Override
     public Player getPlayer(final UUID uuid) {
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if(p.getUniqueId().equals(uuid)) {
+            if (p.getUniqueId().equals(uuid)) {
                 return p;
             }
         }
@@ -388,7 +393,8 @@ public final class CraftServer implements Server {
         while (pollCount < 50 && getScheduler().getActiveWorkers().size() > 0) {
             try {
                 Thread.sleep(50);
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+            }
             pollCount++;
         }
 
@@ -400,10 +406,10 @@ public final class CraftServer implements Server {
                 author = plugin.getDescription().getAuthors().get(0);
             }
             getLogger().log(Level.SEVERE, String.format(
-                "Nag author: '%s' of '%s' about the following: %s",
-                author,
-                plugin.getDescription().getName(),
-                "This plugin is not properly shutting down its async tasks when it is being reloaded.  This may cause conflicts with the newly loaded version of the plugin"
+                    "Nag author: '%s' of '%s' about the following: %s",
+                    author,
+                    plugin.getDescription().getName(),
+                    "This plugin is not properly shutting down its async tasks when it is being reloaded.  This may cause conflicts with the newly loaded version of the plugin"
             ));
         }
         loadPlugins();
@@ -428,7 +434,7 @@ public final class CraftServer implements Server {
         Map<String, Map<String, Object>> perms;
 
         try {
-            perms = (Map<String, Map<String, Object>>)yaml.load(stream);
+            perms = (Map<String, Map<String, Object>>) yaml.load(stream);
         } catch (MarkedYAMLException ex) {
             getLogger().log(Level.WARNING, "Server permissions file " + file + " is not valid YAML: " + ex.toString());
             return;
@@ -438,7 +444,8 @@ public final class CraftServer implements Server {
         } finally {
             try {
                 stream.close();
-            } catch (IOException ex) {}
+            } catch (IOException ex) {
+            }
         }
 
         if (perms == null) {
@@ -516,7 +523,7 @@ public final class CraftServer implements Server {
         }
 
         pluginManager.callEvent(new WorldInitEvent(internal.getWorld()));
-        System.out.print("Preparing start region for level " + (console.worlds.size() -1) + " (Seed: " + internal.getSeed() + ")");
+        System.out.print("Preparing start region for level " + (console.worlds.size() - 1) + " (Seed: " + internal.getSeed() + ")");
 
         if (internal.getWorld().getKeepSpawnInMemory()) {
             short short1 = 196;
@@ -809,7 +816,7 @@ public final class CraftServer implements Server {
         Set<OfflinePlayer> result = new HashSet<OfflinePlayer>();
 
         for (Object name : server.banByName) {
-            result.add(getOfflinePlayer((String)name));
+            result.add(getOfflinePlayer((String) name));
         }
 
         return result;
@@ -829,7 +836,7 @@ public final class CraftServer implements Server {
         Set<OfflinePlayer> result = new HashSet<OfflinePlayer>();
 
         for (Object name : server.e()) {
-            result.add(getOfflinePlayer((String)name));
+            result.add(getOfflinePlayer((String) name));
         }
 
         return result;

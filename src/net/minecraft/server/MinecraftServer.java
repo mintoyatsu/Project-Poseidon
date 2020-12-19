@@ -1,8 +1,8 @@
 package net.minecraft.server;
 
-import com.projectposeidon.PoseidonConfig;
+import com.legacyminecraft.poseidon.PoseidonConfig;
 import com.projectposeidon.johnymuffin.UUIDManager;
-import com.projectposeidon.johnymuffin.WatchDogThread;
+import com.legacyminecraft.poseidon.watchdog.WatchDogThread;
 import jline.ConsoleReader;
 import joptsimple.OptionSet;
 import org.bukkit.World.Environment;
@@ -64,6 +64,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
 
     //Poseidon Start
     private WatchDogThread watchDogThread;
+    private boolean modLoaderSupport = false;
     //Poseidon End
 
     // Sourced from Paper
@@ -147,6 +148,17 @@ public class MinecraftServer implements Runnable, ICommandListener {
         System.setErr(new PrintStream(new LoggerOutputStream(log, Level.SEVERE), true));
         // CraftBukkit end
 
+        modLoaderSupport = PoseidonConfig.getInstance().getBoolean("settings.support.modloader.enable", false);
+
+        if (modLoaderSupport) {
+            log.info("EXPERIMENTAL MODLOADERMP SUPPORT ENABLED.");
+            if (!isModloaderPresent()) {
+                log.severe("ModLoaderMP support is enabled, however, it isn't present. Please install it before enabling this setting");
+                return false;
+            }
+            net.minecraft.server.ModLoader.Init(this);
+        }
+
         log.info("Starting minecraft server version Beta 1.7.3");
         if (Runtime.getRuntime().maxMemory() / 1024L / 1024L < 512L) {
             log.warning("**** NOT ENOUGH RAM!");
@@ -186,10 +198,6 @@ public class MinecraftServer implements Runnable, ICommandListener {
             log.warning("While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.");
             log.warning("To change this, set \"online-mode\" to \"true\" in the server.settings file.");
         }
-        //Project Poseidon Start
-        PoseidonConfig.getInstance();
-        UUIDManager.getInstance();
-        //Project Poseidon End
 
         this.serverConfigurationManager = new ServerConfigurationManager(this);
         // CraftBukkit - removed trackers
@@ -210,10 +218,26 @@ public class MinecraftServer implements Runnable, ICommandListener {
         this.a(new WorldLoaderServer(new File(".")), s1, k);
 
         //Project Poseidon Start
-        log.info("Starting Watchdog to detect any server hangs!");
+        log.info("Starting Project Poseidon Modules!");
+
+        PoseidonConfig.getInstance();
+        UUIDManager.getInstance();
+
+        //Start Watchdog
         watchDogThread = new WatchDogThread(Thread.currentThread());
-        watchDogThread.start();
-        watchDogThread.tickUpdate();
+        if (PoseidonConfig.getInstance().getBoolean("settings.enable-watchdog", true)) {
+            log.info("Starting Watchdog to detect any server hangs!");
+            watchDogThread.start();
+            watchDogThread.tickUpdate();
+        }
+        //Start Poseidon Statistics
+        if (PoseidonConfig.getInstance().getBoolean("settings.settings.statistics.enabled", true)) {
+//            new PoseidonStatisticsAgent(this, this.server);
+        } else {
+            log.info("Please consider enabling statistics in Poseidon.yml. It helps us see how many servers are running Poseidon, and what versions.");
+        }
+
+        log.info("Finished loading Project Poseidon Modules!");
         //Project Poseidon End
 
         // CraftBukkit start
@@ -228,6 +252,15 @@ public class MinecraftServer implements Runnable, ICommandListener {
             this.propertyManager.savePropertiesFile();
         }
         return true;
+    }
+
+    public boolean isModloaderPresent() {
+        try {
+            Class.forName("net.minecraft.server.ModLoader");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     private void a(Convertable convertable, String s, long i) {
@@ -377,7 +410,7 @@ public class MinecraftServer implements Runnable, ICommandListener {
 
     public void stop() { // CraftBukkit - private -> public
         log.info("Stopping server");
-        
+
         //Project Poseidon Start
         UUIDManager.getInstance().saveJsonArray();
         if (watchDogThread != null) {
@@ -416,6 +449,10 @@ public class MinecraftServer implements Runnable, ICommandListener {
                 lastTick = start - TICK_TIME; // Paper
 
                 while (this.isRunning) {
+                    if (modLoaderSupport) {
+                        net.minecraft.server.ModLoader.OnTick(this);
+                    }
+
                     curTime = System.nanoTime();
                     // Paper start - Further improve server tick loop
                     wait = TICK_TIME - (curTime - lastTick);

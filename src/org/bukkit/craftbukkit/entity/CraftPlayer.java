@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.entity;
 
+import com.projectposeidon.ConnectionType;
 import net.minecraft.server.*;
 import org.bukkit.Achievement;
 import org.bukkit.Material;
@@ -15,9 +16,13 @@ import org.bukkit.map.MapView;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class CraftPlayer extends CraftHumanEntity implements Player {
+    private Set<UUID> hiddenPlayers = new HashSet<UUID>();
+
     public CraftPlayer(CraftServer server, EntityPlayer entity) {
         super(server, entity);
     }
@@ -45,7 +50,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public boolean isOnline() {
-        for (Object obj: server.getHandle().players) {
+        for (Object obj : server.getHandle().players) {
             EntityPlayer player = (EntityPlayer) obj;
             if (player.name.equalsIgnoreCase(getName())) {
                 return true;
@@ -140,7 +145,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         // Do not directly assign here, from the packethandler we'll assign it.
         getHandle().netServerHandler.sendPacket(new Packet6SpawnPosition(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
     }
-    
+
     //Project Poseidon Start
     public UUID getUniqueId() {
         //return UUIDPlayerStorage.getInstance().getPlayerUUID(getName());
@@ -350,7 +355,10 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         return getHandle().relativeTime;
     }
 
-    @Override
+    public ConnectionType getConnectionType() {
+        return getHandle().netServerHandler.getConnectionType();
+    }
+
     public boolean isUsingReleaseToBeta() {
         return getHandle().netServerHandler.isUsingReleaseToBeta();
     }
@@ -382,4 +390,35 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             server.getHandle().l(getName().toLowerCase());
         }
     }
+
+    public void hidePlayer(Player player) {
+
+        hiddenPlayers.add(player.getUniqueId());
+
+        //remove this player from the hidden player's EntityTrackerEntry
+        EntityTracker tracker = ((WorldServer) entity.world).tracker;
+        EntityPlayer other = ((CraftPlayer) player).getHandle();
+        EntityTrackerEntry entry = (EntityTrackerEntry) tracker.b.a(other.id);
+        if (entry != null) {
+            entry.c(getHandle());
+        }
+
+    }
+
+    public void showPlayer(Player player) {
+        hiddenPlayers.remove(player.getUniqueId());
+
+        EntityTracker tracker = ((WorldServer) entity.world).tracker;
+        EntityPlayer other = ((CraftPlayer) player).getHandle();
+        EntityTrackerEntry entry = (EntityTrackerEntry) tracker.b.a(other.id);
+        if (entry != null && !entry.trackedPlayers.contains(getHandle())) {
+            entry.b(getHandle());
+        }
+
+    }
+
+    public boolean canSee(Player player) {
+        return !hiddenPlayers.contains(player.getUniqueId());
+    }
+
 }
