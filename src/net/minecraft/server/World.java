@@ -1721,7 +1721,7 @@ public class World implements IBlockAccess {
         }
 
         i = this.worldData.f() + 1L;
-        if (MinecraftServer.currentTick % (int) com.projectposeidon.PoseidonConfig.getInstance().getProperty("world-settings.auto-save-time") == 0L) {
+        if (MinecraftServer.currentTick % (int) com.legacyminecraft.poseidon.PoseidonConfig.getInstance().getProperty("world-settings.auto-save-time") == 0L) {
             this.save(false, (IProgressUpdate) null);
         }
 
