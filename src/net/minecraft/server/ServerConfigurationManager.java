@@ -244,6 +244,14 @@ public class ServerConfigurationManager {
             if (location == null) {
                 cworld = (CraftWorld) this.server.server.getWorlds().get(0);
                 chunkcoordinates = cworld.getHandle().getSpawn();
+                if ((boolean) PoseidonConfig.getInstance().getProperty("world-settings.randomize-spawn")) { //Project Poseidon: Moved randomizing X and Y axis into a config option
+                    chunkcoordinates.x += entityplayer.random.nextInt(2000) - 1000;
+                    chunkcoordinates.z += entityplayer.random.nextInt(2000) - 1000;
+                    if (!cworld.isChunkLoaded(chunkcoordinates.x, chunkcoordinates.z)) {
+                        cworld.loadChunk(chunkcoordinates.x, chunkcoordinates.z);
+                    }
+                    chunkcoordinates.y = cworld.getHighestBlockYAt(chunkcoordinates.x, chunkcoordinates.z);
+                }
                 location = new Location(cworld, chunkcoordinates.x + 0.5, chunkcoordinates.y, chunkcoordinates.z + 0.5);
             }
 
