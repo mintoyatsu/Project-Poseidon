@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+import com.legacyminecraft.poseidon.PoseidonConfig;
+
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -51,7 +53,9 @@ public class NetworkManager {
         try {
             // CraftBukkit start - cant compile these outside the try
             socket.setSoTimeout(30000);
-            socket.setTcpNoDelay(true); // Disable Nagle's algorithm
+            if (PoseidonConfig.getEmptyNode().getBoolean("settings.enable-tpc-nodelay", false)) {
+                socket.setTcpNoDelay(true);
+            }
             this.input = new DataInputStream(socket.getInputStream());
             this.output = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 5120));
         } catch (java.io.IOException socketexception) {
